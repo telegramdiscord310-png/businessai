@@ -152,7 +152,9 @@ function PackDialog({ pack, rate, open, onClose }: { pack: Pack | null; rate: nu
   });
 
   const addFiles = (files: FileList | null) => {
-    if (files?.length) setAdded((list) => [...list, ...Array.from(files)]);
+    // Copie immédiate : la liste du navigateur est vidée dès que le champ est réinitialisé.
+    const picked = files ? Array.from(files) : [];
+    if (picked.length) setAdded((list) => [...list, ...picked]);
   };
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
