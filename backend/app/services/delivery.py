@@ -87,7 +87,7 @@ class DeliveryService:
                     update(Sale).where(Sale.id == sale_id).values(delivery_status="failed", delivery_error=str(exc)[:500])
                 )
                 await session.commit()
-            await self.bus.publish("sale", sale_id=sale_id, chat_id=chat_id)
+            await self.bus.publish("sale", sale_id=sale_id, chat_id=chat_id, kind="failed")
             return False
 
         async with self.sessionmaker() as session:
@@ -96,7 +96,7 @@ class DeliveryService:
             )
             await session.commit()
         log.info("Vente n°%s livrée (pack « %s »)", sale_id, pack.name)
-        await self.bus.publish("sale", sale_id=sale_id, chat_id=chat_id)
+        await self.bus.publish("sale", sale_id=sale_id, chat_id=chat_id, kind="delivered")
         return True
 
     async def recover(self) -> None:

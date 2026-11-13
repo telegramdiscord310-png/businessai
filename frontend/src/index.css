@@ -1,0 +1,174 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Jetons de couleur : sombre par défaut, clair en option (Paramètres → Apparence). */
+:root {
+  color-scheme: dark;
+  --bg: #0d0f13;
+  --surface: #14171c;
+  --surface-2: #1a1e25;
+  --surface-3: #232831;
+  --border: #252a33;
+  --border-strong: #343a46;
+  --text: #eceef1;
+  --text-2: #a7afbd;
+  --text-3: #727b8a;
+  --accent: #3987e5;
+  --accent-hover: #4d95ea;
+  --accent-soft: rgb(57 135 229 / 0.14);
+  --accent-fg: #ffffff;
+  --success: #34b877;
+  --success-soft: rgb(52 184 119 / 0.13);
+  --warning: #e3a43a;
+  --warning-soft: rgb(227 164 58 / 0.13);
+  --danger: #ea5f56;
+  --danger-soft: rgb(234 95 86 / 0.13);
+  --chart: #3987e5;
+  --chart-muted: #2a3f5c;
+  --grid: #20252d;
+  --shadow: 0 12px 40px rgb(0 0 0 / 0.45);
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #f3f4f7;
+  --surface-3: #e9ebf0;
+  --border: #e3e6eb;
+  --border-strong: #cfd4dc;
+  --text: #12151a;
+  --text-2: #535c6a;
+  --text-3: #818a98;
+  --accent: #2a78d6;
+  --accent-hover: #2269bf;
+  --accent-soft: rgb(42 120 214 / 0.1);
+  --accent-fg: #ffffff;
+  --success: #17874f;
+  --success-soft: rgb(23 135 79 / 0.1);
+  --warning: #a66a00;
+  --warning-soft: rgb(196 128 0 / 0.12);
+  --danger: #cf3d34;
+  --danger-soft: rgb(207 61 52 / 0.09);
+  --chart: #2a78d6;
+  --chart-muted: #c5d9f3;
+  --grid: #eceef2;
+  --shadow: 0 12px 40px rgb(15 23 42 / 0.14);
+}
+
+@theme inline {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-ink: var(--text);
+  --color-ink-2: var(--text-2);
+  --color-ink-3: var(--text-3);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-fg: var(--accent-fg);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --shadow-pop: var(--shadow);
+  --animate-in: fade-up 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-fade: fade 0.18s ease-out both;
+  --animate-pop: pop 0.16s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-sheet: sheet 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pop {
+  from { opacity: 0; transform: translate(-50%, -48%) scale(0.97); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes sheet {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "cv11", "ss03";
+    overscroll-behavior: none;
+  }
+  button,
+  [role="button"],
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:not(:disabled),
+  [role="switch"]:not(:disabled) {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--accent-soft);
+  }
+  input[type="number"]::-webkit-inner-spin-button {
+    opacity: 0.4;
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  .scroll-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+  .skeleton {
+    border-radius: 0.5rem;
+    background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 37%, var(--surface-2) 63%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

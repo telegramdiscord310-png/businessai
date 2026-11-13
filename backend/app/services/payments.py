@@ -184,7 +184,7 @@ class PaymentService:
             log.error("Vente n°%s enregistrée mais non livrable : %s", sale.id, sale.delivery_error)
         else:
             log.info("Vente n°%s enregistrée : %s Stars", sale.id, sale.stars)
-        await self.bus.publish("sale", sale_id=sale.id, chat_id=sale.chat_id)
+        await self.bus.publish("sale", sale_id=sale.id, chat_id=sale.chat_id, kind="new", stars=sale.stars)
         return sale, True
 
     async def refund(self, sale_id: int) -> Sale:
@@ -208,5 +208,5 @@ class PaymentService:
             sale.refunded_at = utcnow()
             await session.commit()
         log.info("Vente n°%s remboursée (%s Stars)", sale.id, sale.stars)
-        await self.bus.publish("sale", sale_id=sale.id, chat_id=sale.chat_id)
+        await self.bus.publish("sale", sale_id=sale.id, chat_id=sale.chat_id, kind="refunded")
         return sale
