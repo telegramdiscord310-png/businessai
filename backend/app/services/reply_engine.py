@@ -244,8 +244,11 @@ class ReplyEngine:
             raise
         except AIError as exc:
             log.error("Réponse IA impossible (conversation %s) : %s", chat_id, exc)
-        except Exception:
-            log.exception("Erreur pendant la réponse automatique (conversation %s)", chat_id)
+        except Exception as exc:
+            if getattr(exc, "user_facing", False):
+                log.error("Réponse automatique non envoyée (conversation %s) : %s", chat_id, exc)
+            else:
+                log.exception("Erreur pendant la réponse automatique (conversation %s)", chat_id)
         finally:
             if self._tasks.get(chat_id) is asyncio.current_task():
                 del self._tasks[chat_id]

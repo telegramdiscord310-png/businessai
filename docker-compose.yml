@@ -1,0 +1,117 @@
+# BusinessAI — démarrage : docker compose up -d
+# Les secrets viennent du fichier .env (voir .env.example).
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-app-env: &app-env
+  DATABASE_URL: postgresql+asyncpg://businessai:${POSTGRES_PASSWORD:?Renseignez POSTGRES_PASSWORD dans .env}@db:5432/businessai
+  FERNET_KEY: ${FERNET_KEY:?Renseignez FERNET_KEY dans .env}
+  INTERNAL_TOKEN: ${INTERNAL_TOKEN:?Renseignez INTERNAL_TOKEN dans .env}
+  SETUP_TOKEN: ${SETUP_TOKEN:-}
+  APP_ORIGIN: https://${DOMAIN:?Renseignez DOMAIN dans .env}
+  COOKIE_SECURE: "true"
+  WORKER_URL: http://worker:8100
+  DATA_DIR: /data
+  TIMEZONE: ${TZ:-Europe/Paris}
+  MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-500}
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: businessai
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: businessai
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U businessai -d businessai"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    logging: *logging
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment: *app-env
+    volumes:
+      - appdata:/data
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    logging: *logging
+
+  # Userbot Telegram + bot de paiement. Démarre après le backend (qui applique les migrations).
+  worker:
+    build: ./backend
+    restart: unless-stopped
+    command: ["python", "-m", "app.worker"]
+    environment: *app-env
+    volumes:
+      - appdata:/data
+    depends_on:
+      backend:
+        condition: service_healthy
+    stop_grace_period: 20s
+    logging: *logging
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    logging: *logging
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+      - frontend
+    logging: *logging
+
+  # Sauvegarde quotidienne de la base dans ./backups (voir scripts/backup.sh).
+  backup:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "/backup.sh", "loop"]
+    environment:
+      PGHOST: db
+      PGUSER: businessai
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: businessai
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+      TZ: ${TZ:-Europe/Paris}
+    volumes:
+      - ./backups:/backups
+      - ./scripts/backup.sh:/backup.sh:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    logging: *logging
+
+volumes:
+  pgdata:
+  appdata:
+  caddy_data:
+  caddy_config:

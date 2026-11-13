@@ -1,0 +1,14 @@
+# Versions avec lesquelles l'application a été testée.
+fastapi==0.162.5
+uvicorn[standard]==0.54.0
+sqlalchemy[asyncio]==2.1.8
+alembic==1.20.1
+asyncpg==0.32.0
+argon2-cffi==25.1.0
+cryptography==50.0.2
+pydantic-settings==2.16.2
+python-multipart==0.0.33
+httpx==0.28.1
+telethon==1.45.0
+cryptg==0.6.1
+aiogram==3.31.0

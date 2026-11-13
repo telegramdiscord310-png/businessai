@@ -1,0 +1,31 @@
+# Reverse proxy : HTTPS automatique (Let's Encrypt) pour le domaine défini dans .env.
+{$DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		X-Robots-Tag "noindex, nofollow"
+		-Server
+	}
+
+	# API : envoyée au backend. flush_interval -1 = flux temps réel (SSE) transmis sans tampon.
+	@api path /api/*
+	handle @api {
+		request_body {
+			max_size 600MB
+		}
+		reverse_proxy backend:8000 {
+			flush_interval -1
+		}
+	}
+
+	# Tout le reste : l'interface.
+	handle {
+		header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+		reverse_proxy frontend:80
+	}
+}

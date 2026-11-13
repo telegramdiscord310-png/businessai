@@ -285,3 +285,13 @@ async def test_doublon_telegram_ignore(world):
     assert await world.engine.on_incoming(msg) is None
     await world.engine.wait_idle()
     assert len(world.transport.sent) == 1
+
+
+async def test_identifiant_telegram_deja_connu_n_interrompt_pas_l_envoi(world):
+    """Si Telegram renvoie un identifiant déjà enregistré, l'envoi se termine quand même proprement."""
+    await world.receive(text="Salut")
+    import itertools
+
+    world.transport._ids = itertools.count(world.transport.sent[0]["tg_id"])  # même identifiant qu'avant
+    await world.receive(text="Encore moi")
+    assert len(world.transport.sent) == 2

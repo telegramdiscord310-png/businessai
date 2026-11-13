@@ -18,6 +18,7 @@ class Site:
         self.client, self.app, self.world = client, app, world
         self.csrf = ""
         self.worker_calls: list[tuple] = []
+        self.worker_up = True
 
     async def install(self):
         r = await self.client.post("/api/setup", json={"setup_token": "code-installation-test", "username": "admin", "password": PASSWORD})
@@ -55,6 +56,11 @@ async def site(world, monkeypatch):
 
         for module in ("chats", "sales", "settings", "telegram"):
             monkeypatch.setattr(f"app.api.{module}.call_worker", fake_worker)
+
+        async def alive(_app):
+            return s.worker_up
+
+        monkeypatch.setattr("app.api.status.worker_alive", alive)
         yield s
     get_config.cache_clear()
 
@@ -315,3 +321,16 @@ async def test_etat_general_et_parcours_guide(site):
     data = (await site.client.get("/api/status")).json()
     assert data["onboarding"]["pack"] is True and data["onboarding"]["enabled"] is True
     assert site.world.bus.of_type("status")
+
+
+async def test_worker_arrete_l_etat_ne_reste_pas_connecte(site):
+    await site.install()
+    from app.models import TelegramAccount
+
+    async with site.world.sm() as s:
+        s.add(TelegramAccount(id=1, status="connected", me_name="Moi"))
+        await s.commit()
+    assert (await site.client.get("/api/status")).json()["telegram"]["status"] == "connected"
+    site.worker_up = False
+    data = (await site.client.get("/api/status")).json()["telegram"]
+    assert data["status"] == "error" and "arrêté" in data["error"]

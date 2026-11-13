@@ -31,6 +31,8 @@ LOGIN_TTL = 15 * 60
 class TgError(Exception):
     """Erreur présentable telle quelle (en français)."""
 
+    user_facing = True
+
 
 def human_wait(seconds: int) -> str:
     if seconds < 90:
