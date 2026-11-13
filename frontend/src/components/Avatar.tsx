@@ -21,7 +21,9 @@ export function Avatar({
   className?: string;
 }) {
   const [failed, setFailed] = React.useState(false);
-  const tint = tints[Number(BigInt(String(id).replace(/\D/g, "") || "0") % BigInt(tints.length))];
+  let hash = 0;
+  for (const ch of String(id)) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  const tint = tints[hash % tints.length];
   const style = { width: size, height: size, fontSize: Math.round(size * 0.36) };
   if (hasPhoto && !failed) {
     return (

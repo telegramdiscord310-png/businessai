@@ -194,7 +194,12 @@ class Outbox:
                     session, chat, direction="out", sender=sender, text=text, kind=kind, tg_message_id=tg_id,
                     media_type=media_type, media_desc=media_desc, meta=meta, created_at=now,
                 )
-                assert msg is not None
+                if msg is None:
+                    # Identifiant Telegram déjà connu (cas rare) : on reprend le message existant
+                    # plutôt que d'interrompre l'envoi en cours.
+                    msg = await session.scalar(
+                        select(Message).where(Message.chat_id == chat_id, Message.tg_message_id == tg_id)
+                    )
             if answer_all:
                 await mark_answered(session, chat_id)
             elif answer_upto is not None:

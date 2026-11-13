@@ -254,7 +254,7 @@ function DraftBubble({ message }: { message: Message }) {
     onError: (error) => toast.error(errorMessage(error)),
   });
   return (
-    <div className="flex animate-in justify-end">
+    <div className="mt-3 flex animate-in justify-end">
       <div className="w-full max-w-[min(34rem,88%)] rounded-2xl rounded-br-md border border-dashed border-accent/60 bg-accent-soft p-3.5">
         <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-accent">
           <Sparkles className="size-3.5" />
@@ -477,7 +477,7 @@ function Composer({ chat, disabledReason }: { chat: ChatDetail; disabledReason: 
   };
   const willPause = chat.ai_enabled && !chat.ai_paused;
   return (
-    <div className="pb-safe border-t border-line bg-surface px-3 py-3 sm:px-4">
+    <div className="pb-safe-3 border-t border-line bg-surface px-3 pt-3 sm:px-4">
       <div className="mx-auto flex max-w-3xl items-end gap-2">
         <textarea
           ref={ref}
@@ -501,7 +501,7 @@ function Composer({ chat, disabledReason }: { chat: ChatDetail; disabledReason: 
         </Button>
       </div>
       {willPause && !disabledReason && (
-        <p className="mx-auto mt-1.5 max-w-3xl px-2 text-xs text-ink-3">En répondant vous-même, vous mettez l'IA en pause sur cette conversation.</p>
+        <p className="mx-auto mt-1.5 max-w-3xl px-2 text-xs text-ink-3 max-sm:hidden">En répondant vous-même, vous mettez l'IA en pause sur cette conversation.</p>
       )}
     </div>
   );
@@ -693,8 +693,8 @@ function Thread({ chatId }: { chatId: string }) {
                   return (
                     <React.Fragment key={message.id}>
                       {newDay && (
-                        <div className="sticky top-0 z-10 my-3 flex justify-center">
-                          <span className="rounded-full border border-line bg-surface/95 px-3 py-1 text-xs font-medium text-ink-2 backdrop-blur">{daySeparator(message.created_at)}</span>
+                        <div className="my-4 flex justify-center">
+                          <span className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-ink-2">{daySeparator(message.created_at)}</span>
                         </div>
                       )}
                       <Bubble message={message} grouped={grouped} />

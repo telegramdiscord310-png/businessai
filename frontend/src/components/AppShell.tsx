@@ -11,6 +11,7 @@ import {
   Send,
   Settings,
   Sparkles,
+  Unplug,
   WifiOff,
   type LucideIcon,
 } from "lucide-react";
@@ -189,20 +190,24 @@ const TG_LABEL: Record<string, { label: string; short: string; tone: string }> =
 /** Indicateur permanent : état de Telegram et de l'IA, avec l'interrupteur global. */
 function StatusBar({ status }: { status?: Status }) {
   const toggle = useToggleAI();
-  if (!status) return <div className="skeleton h-9 w-56 rounded-full" />;
+  if (!status) return <div className="skeleton h-9 w-44 rounded-full sm:w-56" />;
   const tg = TG_LABEL[status.telegram.status] ?? TG_LABEL.disconnected;
+  const connected = status.telegram.status === "connected";
   const aiOn = status.ai.enabled;
   const id = "ai-global-switch";
+  const TgIcon = connected ? Send : Unplug;
   return (
-    <div className="flex items-center gap-2">
-      <Tooltip side="bottom" label={status.telegram.error || (status.telegram.status === "connected" ? `Compte : ${status.telegram.name ?? ""}` : "Ouvrir la page Telegram")}>
+    <div className="flex shrink-0 items-center gap-2">
+      <Tooltip side="bottom" label={status.telegram.error || (connected ? `Compte : ${status.telegram.name ?? ""}` : "Ouvrir la page Telegram")}>
         <Link
           to="/telegram"
-          className="flex h-9 items-center gap-2 rounded-full border border-line bg-surface px-3 text-[13px] font-medium text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
+          aria-label={tg.label}
+          className="flex h-9 items-center gap-2 rounded-full border border-line bg-surface px-3 text-[13px] font-medium whitespace-nowrap text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
         >
           <span className={cn("size-2 shrink-0 rounded-full", tg.tone)} />
+          {/* Mobile : icône (avion = connecté, prise débranchée = non connecté). Ordinateur : libellé complet. */}
+          <TgIcon className="size-4 sm:hidden" />
           <span className="hidden sm:inline">{tg.label}</span>
-          <span className="sm:hidden">{tg.short}</span>
         </Link>
       </Tooltip>
       <div className="flex h-9 items-center gap-2 rounded-full border border-line bg-surface pr-1.5 pl-3">
@@ -216,10 +221,10 @@ function StatusBar({ status }: { status?: Status }) {
               : "L'IA ne répond à personne tant qu'elle est en pause."
           }
         >
-          <label htmlFor={id} className="flex cursor-pointer items-center gap-1.5 text-[13px] font-medium text-ink-2">
-            <Bot className={cn("size-4", aiOn ? "text-accent" : "text-ink-3")} />
-            <span className="hidden sm:inline">{aiOn ? (status.ai.draft_mode ? "IA en mode brouillon" : "IA active") : "IA en pause"}</span>
-            <span className="sm:hidden">{aiOn ? "IA active" : "IA en pause"}</span>
+          <label htmlFor={id} className="flex cursor-pointer items-center gap-1.5 text-[13px] font-medium whitespace-nowrap text-ink-2">
+            <Bot className={cn("size-4 max-sm:hidden", aiOn ? "text-accent" : "text-ink-3")} />
+            <span className="hidden md:inline">{aiOn ? (status.ai.draft_mode ? "IA en mode brouillon" : "IA active") : "IA en pause"}</span>
+            <span className="md:hidden">{aiOn ? (status.ai.draft_mode ? "IA brouillon" : "IA active") : "IA en pause"}</span>
           </label>
         </Tooltip>
         <Switch id={id} checked={aiOn} onCheckedChange={(v) => toggle.mutate(v)} aria-label="Activer ou mettre en pause les réponses automatiques" />
@@ -244,9 +249,9 @@ export function AppShell() {
   return (
     <div className="flex h-dvh flex-col lg:pl-60">
       <Sidebar status={status} />
-      <header className={cn("z-20 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-line bg-bg/85 px-4 backdrop-blur sm:px-6 lg:px-8")}>
-        <div className="flex min-w-0 items-center gap-3">
-          <h1 className="truncate text-lg font-semibold tracking-tight sm:text-xl">{title}</h1>
+      <header className={cn("z-20 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-line bg-bg/85 px-3.5 backdrop-blur sm:px-6 lg:px-8")}>
+        <div className="flex min-w-0 items-center gap-2.5">
+          <h1 className="truncate text-[17px] font-semibold tracking-tight sm:text-xl">{title}</h1>
           {!online && (
             <Tooltip side="bottom" label="Connexion temps réel interrompue. Reconnexion automatique en cours…">
               <span className="flex items-center gap-1.5 rounded-full bg-warning-soft px-2 py-1 text-xs font-medium text-warning">

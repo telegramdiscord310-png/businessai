@@ -134,10 +134,10 @@ function Delta({ current, previous, versus }: { current: number; previous: numbe
 
 function RevenueCard({ label, amount, footer, highlight }: { label: string; amount: Amount; footer: React.ReactNode; highlight?: boolean }) {
   return (
-    <Card className={cn("p-5", highlight && "border-accent/40 bg-gradient-to-br from-accent-soft to-transparent")}>
+    <Card className={cn("p-4 sm:p-5", highlight && "border-accent/40 bg-gradient-to-br from-accent-soft to-transparent")}>
       <p className="text-[13px] font-medium text-ink-2">{label}</p>
-      <p className="tabular mt-2 text-[28px] leading-none font-semibold tracking-tight sm:text-[30px]">{euros(amount.eur)}</p>
-      <div className="mt-3 flex items-center justify-between gap-2">
+      <p className="tabular mt-2 text-[22px] leading-none font-semibold tracking-tight sm:text-[30px]">{euros(amount.eur)}</p>
+      <div className="mt-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
         <span className="tabular text-[13px] text-ink-2">{stars(amount.stars)}</span>
         {footer}
       </div>
@@ -180,9 +180,9 @@ function RevenueChart({ series }: { series: Dashboard["series"] }) {
   const step = series.length <= 7 ? 1 : series.length <= 30 ? 5 : 15;
   const ticks = series.filter((_, i) => (series.length - 1 - i) % step === 0).map((p) => p.date);
   return (
-    <div className="h-64 w-full sm:h-72" role="img" aria-label="Revenus estimés par jour, en euros">
+    <div className="h-64 min-h-64 w-full sm:h-full sm:min-h-72" role="img" aria-label="Revenus estimés par jour, en euros">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={series} margin={{ top: 8, right: 4, bottom: 0, left: 0 }} barCategoryGap="22%">
+        <BarChart data={series} margin={{ top: 8, right: 16, bottom: 0, left: 0 }} barCategoryGap="22%">
           <CartesianGrid vertical={false} stroke="var(--grid)" />
           <XAxis
             dataKey="date"
@@ -193,6 +193,7 @@ function RevenueChart({ series }: { series: Dashboard["series"] }) {
             tick={{ fill: "var(--text-3)", fontSize: 12 }}
             tickMargin={8}
             interval={0}
+            padding={{ left: 12, right: 12 }}
           />
           <YAxis
             width={56}
@@ -384,17 +385,18 @@ function SalesSection({ rate }: { rate: number }) {
                     ) : (
                       <p className="truncate font-medium">{sale.client_name}</p>
                     )}
-                    <p className="truncate text-[13px] text-ink-3">
-                      {sale.pack_name} · {dateTime(sale.paid_at)}
-                    </p>
+                    <p className="truncate text-[13px] text-ink-3">{sale.pack_name}</p>
                   </div>
                   <div className="text-right">
                     <p className={cn("tabular font-semibold", sale.refunded_at && "text-ink-3 line-through")}>{euros(sale.eur)}</p>
                     <p className="tabular text-xs text-ink-3">{stars(sale.stars)}</p>
                   </div>
                 </div>
-                <div className="mt-2 flex items-center justify-between pl-12">
-                  <SaleStatus sale={sale} />
+                <div className="mt-2 flex items-center justify-between gap-2 pl-12">
+                  <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                    <SaleStatus sale={sale} />
+                    <span className="tabular text-xs text-ink-3">{dateTime(sale.paid_at)}</span>
+                  </div>
                   {actions(sale)}
                 </div>
               </li>
@@ -450,9 +452,9 @@ export function DashboardPage() {
       {status && !status.onboarding.done && <OnboardingChecklist status={status} />}
 
       {/* Chiffres clés */}
-      <section aria-label="Chiffre d'affaires" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section aria-label="Chiffre d'affaires" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         {!d ? (
-          [0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-[126px] rounded-2xl" />)
+          [0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-[118px] rounded-2xl sm:h-[126px]" />)
         ) : (
           <>
             <RevenueCard label="Aujourd'hui" amount={d.revenue.today} highlight footer={<Delta current={d.revenue.today.stars} previous={d.revenue.yesterday.stars} versus="vs hier" />} />
@@ -481,7 +483,7 @@ export function DashboardPage() {
 
       {/* Graphique + répartition */}
       <section className="grid gap-4 lg:gap-5 xl:grid-cols-3">
-        <Card className="xl:col-span-2">
+        <Card className="flex flex-col xl:col-span-2">
           <CardHeader
             title="Revenus par jour"
             description={d ? `${euros(periodTotal)} estimés sur la période` : undefined}
@@ -498,7 +500,7 @@ export function DashboardPage() {
               />
             }
           />
-          <CardBody className="pt-4">
+          <CardBody className="min-h-0 flex-1 pt-4">
             {!d ? (
               <Skeleton className="h-64 sm:h-72" />
             ) : d.sales_count === 0 ? (

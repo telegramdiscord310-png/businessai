@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileText, ImageIcon, Link2, Package, Pencil, Plus, Star, Trash2, Type, Upload, X } from "lucide-react";
 import * as React from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge, Card, EmptyState, ErrorState, Skeleton } from "@/components/ui/card";
@@ -25,7 +25,12 @@ function PackCover({ pack }: { pack: Pack }) {
           <Package className={cn("size-10", pack.active ? "text-accent/70" : "text-ink-3")} strokeWidth={1.5} />
         </div>
       )}
-      <div className="absolute top-3 left-3">{pack.active ? <Badge tone="success" className="backdrop-blur">En vente</Badge> : <Badge className="bg-surface-3/90 backdrop-blur">Hors vente</Badge>}</div>
+      <div className="absolute top-3 left-3">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">
+          <span className={cn("size-1.5 rounded-full", pack.active ? "bg-[#4ade80]" : "bg-white/50")} />
+          {pack.active ? "En vente" : "Hors vente"}
+        </span>
+      </div>
     </div>
   );
 }
@@ -318,7 +323,7 @@ export function PacksPage() {
             <span className="font-semibold">Bot de paiement non configuré.</span> <span className="text-ink-2">Sans lui, aucun lien de paiement ne peut être créé.</span>
           </p>
           <Button asChild variant="secondary" size="sm">
-            <a href="/parametres#bot">Configurer le bot</a>
+            <Link to="/parametres#bot">Configurer le bot</Link>
           </Button>
         </div>
       )}

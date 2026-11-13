@@ -53,7 +53,7 @@ export function Dialog({
             </DialogPrimitive.Close>
           </div>
           <div className="scroll-thin min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6">{children}</div>
-          {footer && <div className="pb-safe flex flex-col-reverse gap-2 border-t border-line px-5 py-4 sm:flex-row sm:justify-end sm:px-6">{footer}</div>}
+          {footer && <div className="pb-safe-4 flex flex-col-reverse gap-2 border-t border-line px-5 pt-4 sm:flex-row sm:justify-end sm:px-6">{footer}</div>}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
